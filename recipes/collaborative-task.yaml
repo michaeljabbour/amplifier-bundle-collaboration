@@ -1,0 +1,71 @@
+name: collaborative-task
+description: |
+  Execute a task with full collaboration integration.
+  Posts status updates, shares artifacts, and supports handoffs.
+
+inputs:
+  task_description:
+    type: string
+    description: What needs to be done
+    required: true
+  notify_channel:
+    type: string
+    description: Channel for updates
+    default: "general"
+  share_artifacts:
+    type: boolean
+    description: Upload work products to shared documents
+    default: true
+
+steps:
+  - id: announce-start
+    agent: collaboration:channel-communicator
+    prompt: |
+      Post a message to announce work is starting:
+      
+      Channel: {{notify_channel}}
+      Title: 🚀 Starting: {{task_description}}
+      Message: Session beginning work on this task.
+
+  - id: execute-task
+    agent: foundation:zen-architect
+    prompt: |
+      Analyze and execute this task:
+      
+      {{task_description}}
+      
+      Work autonomously to complete this. Document your approach and findings.
+      Return a structured summary of:
+      1. What you did
+      2. Key findings or outputs
+      3. Any artifacts created
+      4. Recommended next steps
+
+  - id: share-results
+    agent: collaboration:document-manager
+    condition: "{{share_artifacts}}"
+    prompt: |
+      Based on the task results:
+      {{steps.execute-task.result}}
+      
+      If there are significant artifacts or findings:
+      1. Format them as a markdown document
+      2. Upload to shared documents
+      3. Return the document URL
+      
+      If no artifacts to share, return "No artifacts to upload"
+
+  - id: announce-completion
+    agent: collaboration:channel-communicator
+    prompt: |
+      Post a completion message:
+      
+      Channel: {{notify_channel}}
+      Title: ✅ Complete: {{task_description}}
+      Message: |
+        **Summary:** {{steps.execute-task.result | truncate(500)}}
+        **Artifacts:** {{steps.share-results.result}}
+
+outputs:
+  result: "{{steps.execute-task.result}}"
+  artifacts: "{{steps.share-results.result}}"

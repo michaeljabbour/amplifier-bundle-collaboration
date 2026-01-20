@@ -1,0 +1,60 @@
+name: task-handoff
+description: |
+  Hand off work to another Amplifier instance with full context.
+  Creates handoff documentation, uploads to shared storage, posts to handoffs channel.
+
+inputs:
+  task_name:
+    type: string
+    description: Name/title of the task
+    required: true
+  current_status:
+    type: string
+    description: What has been done so far
+    required: true
+  reason:
+    type: string
+    description: Why handing off (completion, timeout, blocked, error)
+    required: true
+  next_steps:
+    type: string
+    description: What the next instance should do
+    required: true
+
+steps:
+  - id: create-handoff-doc
+    agent: collaboration:document-manager
+    prompt: |
+      Create and upload a handoff document:
+      
+      # Handoff: {{task_name}}
+      
+      ## Status
+      - Handoff reason: {{reason}}
+      - Timestamp: {{timestamp}}
+      
+      ## Work Completed
+      {{current_status}}
+      
+      ## Next Steps
+      {{next_steps}}
+      
+      Upload to handoffs/ folder and return the URL.
+
+  - id: post-handoff-notice
+    agent: collaboration:channel-communicator
+    prompt: |
+      Post to the handoffs channel:
+      
+      Title: 🔄 Handoff: {{task_name}}
+      Message: |
+        **Reason:** {{reason}}
+        **Status:** {{current_status | truncate(200)}}
+        **Next Steps:** {{next_steps | truncate(200)}}
+        **Full Context:** {{steps.create-handoff-doc.result}}
+        
+        Ready for pickup by another instance.
+
+outputs:
+  handoff_url: "{{steps.create-handoff-doc.result}}"
+  posted: true

@@ -1,0 +1,78 @@
+name: pickup-task
+description: |
+  Check for and pick up tasks from the handoffs channel.
+  Claims work, downloads context, and continues execution.
+
+inputs:
+  auto_claim:
+    type: boolean
+    description: Automatically claim the first available task
+    default: false
+
+steps:
+  - id: check-handoffs
+    agent: collaboration:channel-communicator
+    prompt: |
+      Read the handoffs channel for available tasks:
+      
+      1. Get recent messages from handoffs channel
+      2. Look for messages with "🔄 Handoff:" in the title
+      3. Filter out any that have been claimed (look for "✋ Claimed" replies)
+      4. Return a list of available handoffs with:
+         - Task name
+         - Reason for handoff
+         - Document URL for context
+         - Summary of next steps
+
+  - id: select-task
+    agent: foundation:zen-architect
+    prompt: |
+      Available handoffs:
+      {{steps.check-handoffs.result}}
+      
+      Auto-claim mode: {{auto_claim}}
+      
+      If auto_claim is true, select the first task.
+      Otherwise, analyze the tasks and recommend which one to pick up based on:
+      - Urgency (errors/blocked > timeout > completion)
+      - Complexity fit
+      - Context availability
+      
+      Return your selection with reasoning.
+
+  - id: claim-task
+    agent: collaboration:channel-communicator
+    prompt: |
+      Claim the selected task by posting to handoffs channel:
+      
+      Selected task: {{steps.select-task.result}}
+      
+      Title: ✋ Claimed
+      Message: Picking up this task.
+
+  - id: download-context
+    agent: collaboration:document-manager
+    prompt: |
+      Download the handoff context:
+      
+      From the selected task: {{steps.select-task.result}}
+      
+      1. Extract the document URL
+      2. Download the handoff document
+      3. Return the full context
+
+  - id: continue-work
+    agent: foundation:zen-architect
+    prompt: |
+      Continue the handed-off task:
+      
+      Context from previous instance:
+      {{steps.download-context.result}}
+      
+      Execute the "Next Steps" outlined in the handoff.
+      Document your progress and any new findings.
+
+outputs:
+  task_claimed: "{{steps.select-task.result}}"
+  context: "{{steps.download-context.result}}"
+  result: "{{steps.continue-work.result}}"
