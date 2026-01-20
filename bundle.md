@@ -11,6 +11,9 @@ tools:
     config:
       default_provider: ${COLLAB_PROVIDER:-m365}
 
+  - module: tool-m365
+    source: git+https://github.com/michaeljabbour/amplifier-module-tool-m365@main
+
   - module: tool-slack
     source: git+https://github.com/michaeljabbour/amplifier-module-tool-slack@main
 
@@ -48,7 +51,7 @@ Multi-instance AI collaboration through enterprise platforms.
 
 | Platform | Module | Status |
 |----------|--------|--------|
-| **Microsoft 365** | `tool-collab-core` | ✅ Ready |
+| **Microsoft 365** | `tool-m365` | ✅ Ready |
 | **Slack** | `tool-slack` | ✅ Ready |
 | **Google Workspace** | `tool-google` | 🔜 Coming |
 
@@ -56,17 +59,42 @@ Multi-instance AI collaboration through enterprise platforms.
 
 **Need help setting up?** Use the `setup-assistant` agent:
 ```
-"Help me set up Slack collaboration"
 "Help me set up M365 collaboration"
+"Help me set up Slack collaboration"
 ```
 
 ## Module Repositories
 
-| Module | Repository |
-|--------|------------|
-| Core (M365) | https://github.com/michaeljabbour/amplifier-module-tool-collab-core |
-| Slack | https://github.com/michaeljabbour/amplifier-module-tool-slack |
-| Google | https://github.com/michaeljabbour/amplifier-module-tool-google |
+| Module | Description | Repository |
+|--------|-------------|------------|
+| Core | Shared interfaces | https://github.com/michaeljabbour/amplifier-module-tool-collab-core |
+| M365 | Teams, SharePoint, Outlook | https://github.com/michaeljabbour/amplifier-module-tool-m365 |
+| Slack | Channels, Files, Users | https://github.com/michaeljabbour/amplifier-module-tool-slack |
+| Google | Chat, Drive, Gmail | https://github.com/michaeljabbour/amplifier-module-tool-google |
+
+## Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    amplifier-bundle-collaboration           │
+│  (config, agents, behaviors, recipes)                       │
+└─────────────────────────────────────────────────────────────┘
+                              │
+         ┌────────────────────┼────────────────────┐
+         ▼                    ▼                    ▼
+┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐
+│   tool-m365     │  │   tool-slack    │  │   tool-google   │
+│  (M365Provider) │  │ (SlackProvider) │  │ (GoogleProvider)│
+└────────┬────────┘  └────────┬────────┘  └────────┬────────┘
+         │                    │                    │
+         └────────────────────┼────────────────────┘
+                              ▼
+              ┌───────────────────────────────┐
+              │      tool-collab-core         │
+              │  (CollaborationProvider ABC)  │
+              │  User, Channel, Message, etc. │
+              └───────────────────────────────┘
+```
 
 ## Collaboration Channels
 
