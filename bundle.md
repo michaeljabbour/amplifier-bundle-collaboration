@@ -17,9 +17,8 @@ tools:
   - module: tool-slack
     source: git+https://github.com/michaeljabbour/amplifier-module-tool-slack@main
 
-  # Coming soon
-  # - module: tool-google
-  #   source: git+https://github.com/michaeljabbour/amplifier-module-tool-google@main
+  - module: tool-google
+    source: git+https://github.com/michaeljabbour/amplifier-module-tool-google@main
 
 behaviors:
   - behaviors/collaboration-protocol.md
@@ -53,7 +52,7 @@ Multi-instance AI collaboration through enterprise platforms.
 |----------|--------|--------|
 | **Microsoft 365** | `tool-m365` | ✅ Ready |
 | **Slack** | `tool-slack` | ✅ Ready |
-| **Google Workspace** | `tool-google` | 🔜 Coming |
+| **Google Workspace** | `tool-google` | ✅ Ready |
 
 ## Quick Start
 
