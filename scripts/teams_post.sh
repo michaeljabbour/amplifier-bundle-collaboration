@@ -1,8 +1,19 @@
 #!/bin/bash
 # Post to Teams channel using Azure CLI (delegated user permissions)
 # Usage: ./teams_post.sh <channel> <title> <message>
+#
+# Required environment variables:
+#   M365_TEAM_ID              - Teams team ID
+#   M365_CHANNEL_GENERAL      - Channel ID for 'general'
+#   M365_CHANNEL_ALERTS       - Channel ID for 'alerts'
+#   M365_CHANNEL_HANDOFFS     - Channel ID for 'handoffs'
 
-TEAM_ID="${M365_TEAM_ID:-724b4b22-6936-41c9-918f-b7aecf05c31f}"
+TEAM_ID="${M365_TEAM_ID}"
+
+if [ -z "$TEAM_ID" ]; then
+    echo "❌ Error: M365_TEAM_ID environment variable is required"
+    exit 1
+fi
 
 CHANNEL_NAME="$1"
 TITLE="$2"
@@ -14,16 +25,16 @@ if [ -z "$CHANNEL_NAME" ] || [ -z "$MESSAGE" ]; then
     exit 1
 fi
 
-# Channel mapping (POSIX-compatible)
+# Channel mapping from environment variables
 case "$CHANNEL_NAME" in
     general|amplifier-general)
-        CHANNEL_ID="19:ec912d8300ce415786f158f0894eea2d@thread.tacv2"
+        CHANNEL_ID="${M365_CHANNEL_GENERAL}"
         ;;
     alerts|amplifier-alerts)
-        CHANNEL_ID="19:b768c53adcd647169dc09c8212716bde@thread.tacv2"
+        CHANNEL_ID="${M365_CHANNEL_ALERTS}"
         ;;
     handoffs|amplifier-handoffs)
-        CHANNEL_ID="19:ebb7657e6d794ad9b2e488b8b088c479@thread.tacv2"
+        CHANNEL_ID="${M365_CHANNEL_HANDOFFS}"
         ;;
     *)
         echo "Unknown channel: $CHANNEL_NAME"
@@ -31,6 +42,11 @@ case "$CHANNEL_NAME" in
         exit 1
         ;;
 esac
+
+if [ -z "$CHANNEL_ID" ]; then
+    echo "❌ Error: M365_CHANNEL_${CHANNEL_NAME^^} environment variable is required"
+    exit 1
+fi
 
 # Format content
 if [ -n "$TITLE" ]; then

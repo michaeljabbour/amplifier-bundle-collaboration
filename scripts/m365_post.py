@@ -7,8 +7,14 @@ bypassing the need for webhook configuration.
 Usage:
     python m365_post.py --channel amplifier-handoffs --title "Test" --message "Hello"
 
-Environment variables required:
-    M365_TENANT_ID, M365_CLIENT_ID, M365_CLIENT_SECRET, M365_TEAM_ID
+Required environment variables:
+    M365_TENANT_ID          - Azure AD tenant ID
+    M365_CLIENT_ID          - App registration client ID
+    M365_CLIENT_SECRET      - App registration client secret
+    M365_TEAM_ID            - Teams team ID
+    M365_CHANNEL_GENERAL    - Channel ID for 'general'
+    M365_CHANNEL_ALERTS     - Channel ID for 'alerts'
+    M365_CHANNEL_HANDOFFS   - Channel ID for 'handoffs'
 """
 
 import argparse
@@ -17,43 +23,57 @@ import os
 import sys
 
 from azure.identity import ClientSecretCredential
-from msgraph.graph_service_client import GraphServiceClient
 from msgraph.generated.models.body_type import BodyType
 from msgraph.generated.models.chat_message import ChatMessage
 from msgraph.generated.models.item_body import ItemBody
+from msgraph.graph_service_client import GraphServiceClient
 
 
-# Channel name to ID mapping (set during setup)
-CHANNEL_IDS = {
-    "amplifier-general": "19:ec912d8300ce415786f158f0894eea2d@thread.tacv2",
-    "amplifier-alerts": "19:b768c53adcd647169dc09c8212716bde@thread.tacv2",
-    "amplifier-handoffs": "19:ebb7657e6d794ad9b2e488b8b088c479@thread.tacv2",
-    # Aliases
-    "general": "19:ec912d8300ce415786f158f0894eea2d@thread.tacv2",
-    "alerts": "19:b768c53adcd647169dc09c8212716bde@thread.tacv2",
-    "handoffs": "19:ebb7657e6d794ad9b2e488b8b088c479@thread.tacv2",
-}
+def get_required_env(name: str) -> str:
+    """Get a required environment variable or raise ValueError."""
+    value = os.environ.get(name)
+    if not value:
+        raise ValueError(f"Missing required environment variable: {name}")
+    return value
+
+
+def get_channel_id(channel_name: str) -> str:
+    """Get channel ID from environment variable based on channel name."""
+    channel_map = {
+        "general": "M365_CHANNEL_GENERAL",
+        "amplifier-general": "M365_CHANNEL_GENERAL",
+        "alerts": "M365_CHANNEL_ALERTS",
+        "amplifier-alerts": "M365_CHANNEL_ALERTS",
+        "handoffs": "M365_CHANNEL_HANDOFFS",
+        "amplifier-handoffs": "M365_CHANNEL_HANDOFFS",
+    }
+
+    env_var = channel_map.get(channel_name)
+    if not env_var:
+        available = ["general", "alerts", "handoffs"]
+        raise ValueError(f"Unknown channel: {channel_name}. Available: {available}")
+
+    channel_id = os.environ.get(env_var)
+    if not channel_id:
+        raise ValueError(
+            f"Missing environment variable {env_var} for channel '{channel_name}'"
+        )
+
+    return channel_id
 
 
 async def post_to_teams(
     channel_name: str, message: str, title: str | None = None
 ) -> str:
     """Post a message to a Teams channel via Graph API."""
-    # Get config from environment
-    tenant_id = os.environ.get("M365_TENANT_ID")
-    client_id = os.environ.get("M365_CLIENT_ID")
-    client_secret = os.environ.get("M365_CLIENT_SECRET")
-    team_id = os.environ.get("M365_TEAM_ID", "724b4b22-6936-41c9-918f-b7aecf05c31f")
+    # Get config from environment (all required)
+    tenant_id = get_required_env("M365_TENANT_ID")
+    client_id = get_required_env("M365_CLIENT_ID")
+    client_secret = get_required_env("M365_CLIENT_SECRET")
+    team_id = get_required_env("M365_TEAM_ID")
 
-    if not tenant_id or not client_id or not client_secret:
-        raise ValueError("Missing M365 credentials in environment")
-
-    # Get channel ID
-    channel_id = CHANNEL_IDS.get(channel_name)
-    if not channel_id:
-        raise ValueError(
-            f"Unknown channel: {channel_name}. Available: {list(CHANNEL_IDS.keys())}"
-        )
+    # Get channel ID from environment
+    channel_id = get_channel_id(channel_name)
 
     # Create Graph client
     credential = ClientSecretCredential(
