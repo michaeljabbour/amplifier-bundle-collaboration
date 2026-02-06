@@ -327,7 +327,7 @@ github.com/michaeljabbour/
 │   │       └── @mj/tool-google
 │   └── README.md
 │
-├── amplifier-module-tool-collab-core/       ← Shared interfaces
+├── amplifier-collab-core/                   ← Shared interfaces (library)
 │   ├── src/
 │   │   ├── interfaces/
 │   │   │   ├── ICollaborationProvider.ts

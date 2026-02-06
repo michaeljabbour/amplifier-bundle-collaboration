@@ -58,7 +58,7 @@ amplifier-bundle-collaboration/
 **External Module Dependencies:**
 | Module | Source | Purpose |
 |--------|--------|---------|
-| `tool-collab-core` | git+github.com/michaeljabbour/amplifier-module-tool-collab-core | Shared interfaces |
+| `collab-core` | git+github.com/michaeljabbour/amplifier-collab-core | Shared interfaces (library) |
 | `tool-m365` | git+github.com/michaeljabbour/amplifier-module-tool-m365 | Microsoft 365 provider |
 | `tool-slack` | git+github.com/michaeljabbour/amplifier-module-tool-slack | Slack provider |
 | `tool-google` | git+github.com/michaeljabbour/amplifier-module-tool-google | Google Workspace provider |

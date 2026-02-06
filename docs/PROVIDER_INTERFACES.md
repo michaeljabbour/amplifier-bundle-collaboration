@@ -302,7 +302,7 @@ Providers register themselves on import:
 
 ```python
 # In each provider module's __init__.py:
-from amplifier_module_tool_collab_core import register_provider
+from amplifier_collab_core import register_provider
 from .providers.m365 import M365Provider
 
 register_provider("m365", M365Provider)
@@ -311,7 +311,7 @@ register_provider("m365", M365Provider)
 To use a provider:
 
 ```python
-from amplifier_module_tool_collab_core import get_provider, list_providers
+from amplifier_collab_core import get_provider, list_providers
 
 # See what's available
 print(list_providers())  # ['m365', 'slack', 'google']

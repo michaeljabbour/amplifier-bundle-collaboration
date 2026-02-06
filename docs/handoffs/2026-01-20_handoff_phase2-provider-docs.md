@@ -25,7 +25,7 @@ This is part of the **Codebase Documentation Sprint** for `amplifier-bundle-coll
 
 Document the provider interfaces by examining the external modules:
 
-1. **Read `amplifier-module-tool-collab-core`** - Get the base `CollaborationProvider` class
+1. **Read `amplifier-collab-core`** - Get the base `CollaborationProvider` class
 2. **Read `amplifier-module-tool-m365`** - Document M365Provider implementation
 3. **Read `amplifier-module-tool-slack`** - Document SlackProvider implementation  
 4. **Read `amplifier-module-tool-google`** - Document GoogleProvider implementation
@@ -34,7 +34,7 @@ Document the provider interfaces by examining the external modules:
 ## Module Locations
 
 ```
-~/dev/amplifier-module-tool-collab-core/
+~/dev/amplifier-collab-core/
 ~/dev/amplifier-module-tool-m365/
 ~/dev/amplifier-module-tool-slack/
 ~/dev/amplifier-module-tool-google/

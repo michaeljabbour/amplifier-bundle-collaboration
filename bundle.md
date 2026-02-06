@@ -4,13 +4,13 @@ bundle:
   version: 1.0.0
   description: Multi-instance AI collaboration via Microsoft 365, Slack, Google Workspace
 
-# External modules (published separately)
-tools:
-  - module: tool-collab-core
-    source: git+https://github.com/michaeljabbour/amplifier-module-tool-collab-core@main
-    config:
-      default_provider: ${COLLAB_PROVIDER:-m365}
+includes:
+  - bundle: git+https://github.com/microsoft/amplifier-foundation@main
 
+# External tool modules (published separately)
+# Note: collab-core is now a library dependency (amplifier-collab-core),
+# not a module. It provides shared interfaces consumed by the tool modules.
+tools:
   - module: tool-m365
     source: git+https://github.com/michaeljabbour/amplifier-module-tool-m365@main
 
@@ -66,7 +66,7 @@ Multi-instance AI collaboration through enterprise platforms.
 
 | Module | Description | Repository |
 |--------|-------------|------------|
-| Core | Shared interfaces | https://github.com/michaeljabbour/amplifier-module-tool-collab-core |
+| Core | Shared interfaces (library) | https://github.com/michaeljabbour/amplifier-collab-core |
 | M365 | Teams, SharePoint, Outlook | https://github.com/michaeljabbour/amplifier-module-tool-m365 |
 | Slack | Channels, Files, Users | https://github.com/michaeljabbour/amplifier-module-tool-slack |
 | Google | Chat, Drive, Gmail | https://github.com/michaeljabbour/amplifier-module-tool-google |
@@ -89,7 +89,7 @@ Multi-instance AI collaboration through enterprise platforms.
          └────────────────────┼────────────────────┘
                               ▼
               ┌───────────────────────────────┐
-              │      tool-collab-core         │
+              │      amplifier-collab-core     │
               │  (CollaborationProvider ABC)  │
               │  User, Channel, Message, etc. │
               └───────────────────────────────┘
